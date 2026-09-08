@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đơn hàng của tôi - MyShop</title>
+    <style>
+        /* (giữ nguyên CSS cũ) */
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',system-ui,sans-serif; }
+        body { background:#f4f6f9; color:#2d3436; }
+        .container { max-width:1200px; margin:0 auto; padding:0 20px; }
+        a { text-decoration:none; color:inherit; }
+
+        .header {
+            background:#fff; box-shadow:0 2px 12px rgba(0,0,0,0.06);
+            padding:0 20px; height:72px; display:flex; align-items:center;
+            justify-content:space-between; position:sticky; top:0; z-index:1000;
+        }
+        .header .logo { font-size:26px; font-weight:800; background:linear-gradient(135deg,#667eea,#764ba2); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .header .logo span { -webkit-text-fill-color:#764ba2; }
+        .header .nav-links { display:flex; gap:20px; align-items:center; flex:1; margin-left:30px; }
+        .header .nav-links a { color:#555; font-weight:500; font-size:15px; transition:color 0.2s; }
+        .header .nav-links a:hover { color:#667eea; }
+        .header .nav-links .cart-link { position:relative; font-size:20px; margin-left:auto; }
+        .header .nav-links .cart-link .badge {
+            position:absolute; top:-8px; right:-12px; background:#e74c3c; color:#fff;
+            font-size:11px; border-radius:50%; padding:2px 6px; min-width:18px; text-align:center;
+        }
+        .header .user-section { display:flex; align-items:center; gap:12px; margin-left:20px; }
+        .header .user-info { display:flex; align-items:center; gap:8px; font-weight:500; color:#333; }
+        .header .user-info .avatar {
+            width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,#667eea,#764ba2);
+            color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:15px; text-transform:uppercase;
+        }
+        .header .user-info .username { max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .header .btn-logout { background:#e74c3c; color:#fff; border:none; padding:6px 16px; border-radius:6px; font-weight:600; font-size:14px; cursor:pointer; transition:background 0.2s; }
+        .header .btn-logout:hover { background:#c0392b; }
+        .header .auth-links { display:flex; gap:10px; align-items:center; }
+        .header .auth-links .btn { padding:6px 16px; border-radius:6px; font-weight:600; font-size:14px; cursor:pointer; transition:all 0.25s; border:none; text-decoration:none; }
+        .header .auth-links .btn-outline { background:transparent; border:2px solid #667eea; color:#667eea; }
+        .header .auth-links .btn-outline:hover { background:#667eea; color:#fff; }
+        .header .auth-links .btn-primary { background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; }
+        .header .auth-links .btn-primary:hover { transform:scale(1.04); box-shadow:0 8px 24px rgba(102,126,234,0.35); }
+
+        .orders-section {
+            background:#fff; border-radius:20px; box-shadow:0 4px 20px rgba(0,0,0,0.04);
+            padding:30px; margin:40px 0; border:1px solid #f0f0f0;
+        }
+        .orders-section h2 { font-size:28px; font-weight:700; margin-bottom:24px; color:#2d3436; border-bottom:2px solid #f0f0f0; padding-bottom:16px; }
+
+        .order-card {
+            border:1px solid #eee; border-radius:12px; padding:20px; margin-bottom:16px;
+            transition:box-shadow 0.2s; background:#fafafa;
+        }
+        .order-card:hover { box-shadow:0 4px 12px rgba(0,0,0,0.06); }
+        .order-card .order-header {
+            display:flex; justify-content:space-between; align-items:center;
+            flex-wrap:wrap; gap:10px; margin-bottom:10px;
+        }
+        .order-card .order-id { font-weight:700; font-size:16px; color:#333; }
+        .order-card .order-status {
+            font-weight:700; padding:4px 14px; border-radius:20px; font-size:14px;
+        }
+        .order-card .order-status.unpaid { background:#fef3c7; color:#d97706; }
+        .order-card .order-status.completed { background:#d1fae5; color:#065f46; }
+        .order-card .order-status.cancelled { background:#fee2e2; color:#991b1b; }
+        .order-card .order-status.unknown { background:#e5e7eb; color:#4b5563; }
+
+        .order-card .order-info { margin:8px 0; color:#555; font-size:14px; }
+        .order-card .order-items { margin:10px 0; padding-left:16px; border-left:3px solid #667eea; }
+        .order-card .order-item { 
+            display:flex; justify-content:space-between; align-items:center; 
+            padding:6px 0; font-size:14px; 
+        }
+        .order-card .order-item .item-info { flex:1; }
+        .order-card .order-item .item-actions { margin-left:12px; }
+        .order-card .order-total { font-weight:700; font-size:18px; margin-top:10px; color:#2d3436; }
+        .order-card .order-actions { margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; }
+        .order-card .btn-cancel {
+            padding:6px 20px; background:#e74c3c; color:#fff; border:none;
+            border-radius:6px; font-weight:600; cursor:pointer; transition:background 0.2s;
+        }
+        .order-card .btn-cancel:hover { background:#c0392b; }
+        .order-card .btn-cancel:disabled { background:#ccc; cursor:not-allowed; }
+
+        .order-card .btn-pay {
+            padding:6px 20px; background:linear-gradient(135deg,#27ae60,#2ecc71);
+            color:#fff; border:none; border-radius:6px; font-weight:600;
+            cursor:pointer; transition:transform 0.2s;
+        }
+        .order-card .btn-pay:hover { transform:scale(1.05); }
+        .order-card .btn-pay:disabled { background:#ccc; cursor:not-allowed; transform:none; }
+
+        .order-card .btn-review {
+            padding:4px 14px; background:linear-gradient(135deg,#f39c12,#e67e22);
+            color:#fff; border:none; border-radius:6px; font-weight:600;
+            cursor:pointer; transition:transform 0.2s;
+            font-size:13px;
+        }
+        .order-card .btn-review:hover { transform:scale(1.05); }
+        .order-card .btn-review:disabled { background:#ccc; cursor:not-allowed; transform:none; }
+
+        .order-card .reviewed-badge {
+            padding:4px 12px; background:#d1fae5; color:#065f46; border-radius:6px;
+            font-weight:600; font-size:13px;
+        }
+
+        .btn-back {
+            display:inline-block; padding:10px 24px; background:#667eea; color:#fff;
+            border:none; border-radius:40px; font-weight:600; font-size:16px;
+            cursor:pointer; transition:transform 0.2s; margin-bottom:20px;
+        }
+        .btn-back:hover { transform:scale(1.03); }
+
+        .empty-orders { text-align:center; padding:60px 20px; color:#888; font-size:18px; }
+        .empty-orders .icon { font-size:64px; margin-bottom:16px; }
+
+        .toast {
+            position:fixed; bottom:30px; right:30px; background:#fff; color:#333; padding:16px 24px;
+            border-radius:14px; font-weight:600; font-size:15px; box-shadow:0 8px 32px rgba(0,0,0,0.15);
+            z-index:9999; opacity:0; transform:translateY(30px); transition:all 0.4s ease;
+            border-left:5px solid #27ae60; max-width:400px; pointer-events:none;
+        }
+        .toast.show { opacity:1; transform:translateY(0); }
+        .toast.error { border-left-color:#e74c3c; }
+
+        .loading { text-align:center; padding:60px 20px; color:#888; font-size:18px; }
+        .loading .spinner { border:4px solid #f3f3f3; border-top:4px solid #667eea; border-radius:50%; width:44px; height:44px; animation:spin 0.9s linear infinite; margin:0 auto 16px; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+
+        .footer { background:#1a1a2e; color:#ccc; padding:50px 20px 30px; margin-top:60px; }
+        .footer-content { max-width:1200px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:40px; }
+        .footer-content h4 { color:#fff; font-size:18px; margin-bottom:14px; font-weight:600; }
+        .footer-content p, .footer-content li { font-size:14px; opacity:0.8; list-style:none; margin-bottom:8px; }
+        .footer-bottom { text-align:center; padding-top:24px; border-top:1px solid #2d2d44; margin-top:32px; font-size:14px; opacity:0.7; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">My<span>Shop</span></div>
+        <div class="nav-links">
+            <a href="trangchu.html">Trang chủ</a>
+            <a href="trangchu.html">Sản phẩm</a>
+            <a href="cart.html" class="cart-link">
+                🛒 <span class="badge" id="cartCount">0</span>
+            </a>
+            <div id="userSection" class="user-section"></div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="orders-section">
+            <h2>📦 Đơn hàng của tôi</h2>
+            <button class="btn-back" onclick="window.location.href='profile.html'">← Quay lại hồ sơ</button>
+            <div id="ordersContainer">
+                <div class="loading"><div class="spinner"></div>Đang tải đơn hàng...</div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div><h4>MyShop</h4><p>Mua sắm trực tuyến hàng đầu Việt Nam.</p></div>
+            <div><h4>Liên kết</h4><ul><li><a href="#">Giới thiệu</a></li><li><a href="#">Chính sách</a></li><li><a href="#">Hỗ trợ</a></li></ul></div>
+            <div><h4>Liên hệ</h4><p>Email: support@myshop.vn</p><p>Hotline: 1900 1234</p></div>
+        </div>
+        <div class="footer-bottom">&copy; 2026 MyShop. All rights reserved.</div>
+    </footer>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8080';
+
+        const ordersContainer = document.getElementById('ordersContainer');
+        const cartCount = document.getElementById('cartCount');
+        const userSection = document.getElementById('userSection');
+        const toast = document.getElementById('toast');
+
+        let toastTimeout = null;
+
+        function showToast(msg, isError=false) {
+            toast.innerHTML = msg;
+            toast.className = 'toast' + (isError ? ' error' : '');
+            toast.classList.add('show');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
+        // ========================= TOKEN =========================
+        async function refreshAccessToken() {
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/account/refresh-token`, { method:'POST', credentials:'include' });
+                if (!res.ok) throw new Error('Refresh failed');
+                const data = await res.json();
+                const token = data?.result?.accessToken || data?.accessToken;
+                if (token) sessionStorage.setItem('accessToken', token);
+                return token;
+            } catch(e) { console.error(e); return null; }
+        }
+        async function getAccessToken() {
+            let t = sessionStorage.getItem('accessToken');
+            if (!t) t = await refreshAccessToken();
+            return t;
+        }
+
+        async function fetchData(url, opts={}) {
+            let token = await getAccessToken();
+            if (!token) throw new Error('Không thể lấy access token. Vui lòng đăng nhập lại.');
+            const headers = { 'Content-Type':'application/json', 'Authorization':`Bearer ${token}`, ...(opts.headers||{}) };
+            let res = await fetch(url, { ...opts, credentials:'include', headers });
+            if (res.status===401 || res.status===403) {
+                const newToken = await refreshAccessToken();
+                if (newToken) {
+                    headers['Authorization'] = `Bearer ${newToken}`;
+                    res = await fetch(url, { ...opts, credentials:'include', headers });
+                    if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e?.message || e?.result?.message || `HTTP ${res.status}`); }
+                    const data = await res.json();
+                    return data?.result || data;
+                } else {
+                    sessionStorage.removeItem('accessToken');
+                    window.location.href = 'dang-nhap.html';
+                    throw new Error('Phiên đăng nhập hết hạn.');
+                }
+            }
+            if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e?.message || e?.result?.message || `HTTP ${res.status}`); }
+            const data = await res.json();
+            return data?.result || data;
+        }
+
+        function formatPrice(p) { return new Intl.NumberFormat('vi-VN', { style:'currency', currency:'VND' }).format(p); }
+
+        function getStatusClass(status) {
+            const s = status?.toUpperCase();
+            if (s === 'UNPAID') return 'unpaid';
+            if (s === 'COMPLETED') return 'completed';
+            if (s === 'CANCELLED') return 'cancelled';
+            return 'unknown';
+        }
+
+        function getStatusText(status) {
+            const s = status?.toUpperCase();
+            if (s === 'UNPAID') return 'Chưa thanh toán';
+            if (s === 'COMPLETED') return 'Hoàn thành';
+            if (s === 'CANCELLED') return 'Đã hủy';
+            return status || 'Không xác định';
+        }
+
+        // ===== Render Orders =====
+        function renderOrders(orders, reviewStatusMap) {
+            if (!orders || orders.length === 0) {
+                ordersContainer.innerHTML = `
+                    <div class="empty-orders">
+                        <div class="icon">📭</div>
+                        <p>Bạn chưa có đơn hàng nào.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            orders.forEach(order => {
+                const statusClass = getStatusClass(order.status);
+                const statusText = getStatusText(order.status);
+                const canCancel = order.status?.toUpperCase() === 'UNPAID';
+                const canPay = order.status?.toUpperCase() === 'UNPAID';
+                const isCompleted = order.status?.toUpperCase() === 'COMPLETED';
+
+                let itemsHtml = '';
+                if (order.orderItems && order.orderItems.length) {
+                    order.orderItems.forEach(item => {
+                        const productName = item.product?.nameProduct || 'Sản phẩm';
+                        const price = item.price || 0;
+                        const qty = item.quantity || 1;
+                        const productId = item.product?.id;
+                        const key = order.id + '_' + productId;
+                        const isReviewed = reviewStatusMap.get(key) || false;
+
+                        let actionHtml = '';
+                        if (isCompleted && productId) {
+                            if (isReviewed) {
+                                actionHtml = `<span class="reviewed-badge">✅ Đã đánh giá</span>`;
+                            } else {
+                                actionHtml = `<button class="btn-review" onclick="window.location.href='review.html?orderId=${order.id}&productId=${productId}'">⭐ Đánh giá</button>`;
+                            }
+                        }
+
+                        itemsHtml += `
+                            <div class="order-item">
+                                <div class="item-info">
+                                    ${productName} x ${qty} - ${formatPrice(price * qty)}
+                                </div>
+                                <div class="item-actions">
+                                    ${actionHtml}
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    itemsHtml = '<div style="color:#888; font-size:14px; padding:6px 0;">(Không có sản phẩm)</div>';
+                }
+
+                html += `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <span class="order-id">#${order.id}</span>
+                            <span class="order-status ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="order-info">
+                            Ngày đặt: ${order.createdAt ? new Date(order.createdAt).toLocaleString('vi-VN') : 'Không rõ'}
+                        </div>
+                        <div class="order-items">
+                            ${itemsHtml}
+                        </div>
+                        <div class="order-total">Tổng cộng: ${formatPrice(order.totalAmount || 0)}</div>
+                        <div class="order-actions">
+                            ${canPay ? `<button class="btn-pay" data-order-id="${order.id}">💳 Thanh toán online</button>` : ''}
+                            ${canCancel ? `<button class="btn-cancel" data-order-id="${order.id}">Hủy đơn hàng</button>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            ordersContainer.innerHTML = html;
+
+            // Sự kiện hủy đơn
+            document.querySelectorAll('.btn-cancel').forEach(btn => {
+                btn.addEventListener('click', async function() {
+                    const orderId = this.dataset.orderId;
+                    if (!confirm('Bạn có chắc chắn muốn hủy đơn hàng #' + orderId + '?')) return;
+                    this.disabled = true;
+                    this.textContent = 'Đang xử lý...';
+                    try {
+                        await fetchData(`${API_BASE_URL}/api/orders/${orderId}/cancel`, { method: 'PUT' });
+                        showToast('✅ Đã hủy đơn hàng thành công.');
+                        loadOrders();
+                    } catch (e) {
+                        showToast(`❌ ${e.message}`, true);
+                        this.disabled = false;
+                        this.textContent = 'Hủy đơn hàng';
+                    }
+                });
+            });
+
+            // Sự kiện thanh toán online
+            document.querySelectorAll('.btn-pay').forEach(btn => {
+                btn.addEventListener('click', async function() {
+                    const orderId = this.dataset.orderId;
+                    this.disabled = true;
+                    this.textContent = 'Đang tạo...';
+                    try {
+                        const result = await fetchData(`${API_BASE_URL}/api/payment/create-vnpay/${orderId}`, { method: 'GET' });
+                        const paymentUrl = result?.paymentUrl;
+                        if (paymentUrl) {
+                            showToast('🔗 Đang chuyển đến trang thanh toán...', false);
+                            window.location.href = paymentUrl;
+                        } else {
+                            throw new Error('Không tạo được URL thanh toán.');
+                        }
+                    } catch (e) {
+                        showToast(`❌ ${e.message}`, true);
+                        this.disabled = false;
+                        this.textContent = '💳 Thanh toán online';
+                    }
+                });
+            });
+        }
+
+        // ===== Load Orders =====
+        async function loadOrders() {
+            try {
+                const data = await fetchData(`${API_BASE_URL}/api/orders/my-orders`);
+                const orders = Array.isArray(data) ? data : (data?.result || []);
+                
+                // Thu thập tất cả các cặp (orderId, productId) cần kiểm tra đánh giá
+                const checkPromises = [];
+                const reviewStatusMap = new Map();
+                orders.forEach(order => {
+                    if (order.orderItems && order.orderItems.length) {
+                        order.orderItems.forEach(item => {
+                            const productId = item.product?.id;
+                            if (productId) {
+                                const key = order.id + '_' + productId;
+                                console.log(`🔍 Kiểm tra đánh giá: orderId=${order.id}, productId=${productId}`);
+                                // Gọi API kiểm tra đánh giá
+                                checkPromises.push(
+                                    fetchData(`${API_BASE_URL}/api/reviews/check?orderId=${order.id}&productId=${productId}`)
+                                        .then(result => {
+                                            console.log(`✅ orderId=${order.id}, productId=${productId}, reviewed=${result}`);
+                                            reviewStatusMap.set(key, result === true);
+                                        })
+                                        .catch((err) => {
+                                            console.warn(`⚠️ Lỗi check review: ${err.message}`);
+                                            reviewStatusMap.set(key, false); // mặc định false nếu lỗi
+                                        })
+                                );
+                            }
+                        });
+                    }
+                });
+
+                // Chờ tất cả các request hoàn thành
+                await Promise.all(checkPromises);
+                
+                console.log('📊 reviewStatusMap:', Array.from(reviewStatusMap.entries()));
+                
+                // Render với reviewStatusMap
+                renderOrders(orders, reviewStatusMap);
+            } catch(e) {
+                ordersContainer.innerHTML = `<div class="error-msg">❌ ${e.message}</div>`;
+                console.error(e);
+            }
+        }
+
+        // ===== Auth & Header =====
+        function getUserInfo() {
+            try { return JSON.parse(sessionStorage.getItem('accountInfo')); } catch { return null; }
+        }
+        function renderHeader() {
+            const user = getUserInfo();
+            if (user?.accountname) {
+                const initial = user.accountname.charAt(0).toUpperCase();
+                userSection.innerHTML = `
+                    <div class="user-info">
+                        <div class="avatar">${initial}</div>
+                        <span class="username">${user.accountname}</span>
+                    </div>
+                    <button class="btn-logout" id="logoutBtn">Đăng xuất</button>
+                `;
+                document.getElementById('logoutBtn')?.addEventListener('click', function() {
+                    sessionStorage.removeItem('accountInfo');
+                    sessionStorage.removeItem('accessToken');
+                    localStorage.removeItem('cartCount');
+                    window.location.href = 'dang-nhap.html';
+                });
+            } else {
+                userSection.innerHTML = `
+                    <div class="auth-links">
+                        <a href="dang-nhap.html" class="btn btn-outline">Đăng nhập</a>
+                        <a href="dang-ky.html" class="btn btn-primary">Đăng ký</a>
+                    </div>
+                `;
+                window.location.href = 'dang-nhap.html';
+            }
+        }
+
+        function updateCartCount() {
+            const count = parseInt(localStorage.getItem('cartCount') || '0');
+            cartCount.textContent = count;
+        }
+
+        // ===== INIT =====
+        async function init() {
+            renderHeader();
+            await getAccessToken();
+            updateCartCount();
+            loadOrders();
+        }
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

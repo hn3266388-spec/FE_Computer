@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng ký tài khoản</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            background: #ffffff;
+            padding: 40px 35px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 420px;
+            transition: transform 0.3s;
+        }
+        .container:hover {
+            transform: translateY(-5px);
+        }
+        h2 {
+            margin-bottom: 25px;
+            color: #333;
+            text-align: center;
+            font-weight: 600;
+            font-size: 28px;
+            letter-spacing: 1px;
+        }
+        h2 span {
+            color: #667eea;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #555;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            background: #f9f9f9;
+        }
+        input:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+            background: #fff;
+        }
+        button[type="submit"] {
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 17px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button[type="submit"]:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        button[type="submit"]:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .divider {
+            text-align: center;
+            margin: 25px 0;
+            position: relative;
+        }
+        .divider::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #ddd;
+        }
+        .divider span {
+            background: #fff;
+            padding: 0 15px;
+            position: relative;
+            color: #999;
+            font-size: 14px;
+        }
+        .google-btn {
+            width: 100%;
+            padding: 12px;
+            background: #ffffff;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            color: #333;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: background 0.3s, border-color 0.3s, transform 0.2s;
+        }
+        .google-btn:hover {
+            background: #f5f5f5;
+            border-color: #bbb;
+            transform: scale(1.02);
+        }
+        #messageBox {
+            margin-top: 18px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+            text-align: center;
+            font-weight: 500;
+        }
+        .error {
+            background: #fee;
+            color: #d32f2f;
+            border: 1px solid #f5c6cb;
+        }
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+        .switch-link {
+            display: block;
+            margin-top: 20px;
+            font-size: 15px;
+            color: #555;
+            text-align: center;
+        }
+        .switch-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+        .switch-link a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Đăng <span>ký</span></h2>
+
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="accountname">👤 Tên tài khoản</label>
+                <input type="text" id="accountname" required placeholder="Nhập tên tài khoản" />
+            </div>
+            <div class="form-group">
+                <label for="gmail">📧 Gmail</label>
+                <input type="email" id="gmail" required placeholder="Nhập địa chỉ Gmail" />
+            </div>
+            <div class="form-group">
+                <label for="password">🔒 Mật khẩu</label>
+                <input type="password" id="password" required placeholder="Ít nhất 8 ký tự" />
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">✅ Xác nhận mật khẩu</label>
+                <input type="password" id="confirmPassword" required placeholder="Nhập lại mật khẩu" />
+            </div>
+            <button type="submit" id="registerBtn">Đăng ký tài khoản</button>
+        </form>
+
+        <div class="divider">
+            <span>Hoặc</span>
+        </div>
+
+        <button type="button" id="googleLoginBtn" class="google-btn">
+            <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.46-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+            </svg>
+            Đăng nhập / Đăng ký với Google
+        </button>
+
+        <div id="messageBox"></div>
+
+        <div class="switch-link">
+            Đã có tài khoản? <a href="dang-nhap.html">Đăng nhập ngay</a>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8080';
+
+        const registerForm = document.getElementById('registerForm');
+        const registerBtn = document.getElementById('registerBtn');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const googleLoginBtn = document.getElementById('googleLoginBtn');
+        const messageBox = document.getElementById('messageBox');
+
+        function showMessage(text, type) {
+            messageBox.textContent = text;
+            messageBox.className = type;
+            messageBox.style.display = 'block';
+        }
+
+        registerForm.addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const accountname = document.getElementById('accountname').value.trim();
+            const gmail = document.getElementById('gmail').value.trim();
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            if (!accountname || !gmail || !password) {
+                showMessage('Vui lòng điền đầy đủ thông tin.', 'error');
+                return;
+            }
+            if (password.length < 8) {
+                showMessage('Mật khẩu phải có ít nhất 8 ký tự.', 'error');
+                return;
+            }
+            if (password !== confirmPassword) {
+                showMessage('Mật khẩu xác nhận không khớp.', 'error');
+                return;
+            }
+
+            registerBtn.disabled = true;
+            registerBtn.textContent = 'Đang tạo tài khoản...';
+            messageBox.style.display = 'none';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/account/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ accountname, gmail, password })
+                });
+
+                let data = {};
+                try {
+                    data = await response.json();
+                } catch (_) {}
+
+                if (!response.ok) {
+                    throw new Error(data?.message || data?.result?.message || 'Đăng ký tài khoản thất bại.');
+                }
+
+                sessionStorage.setItem('registerGmail', gmail);
+
+                fetch(`${API_BASE_URL}/api/account/send-code?gmail=${encodeURIComponent(gmail)}`, {
+                    method: 'POST',
+                    credentials: 'include'
+                }).catch(err => console.warn('Gửi OTP lỗi:', err));
+
+                showMessage('Đăng ký thành công! Đang chuyển sang xác thực OTP...', 'success');
+
+                setTimeout(() => {
+                    window.location.href = 'xac-thuc-otp.html';
+                }, 600);
+
+            } catch (error) {
+                console.error('REGISTER ERROR:', error);
+                showMessage(error.message || 'Không thể kết nối đến máy chủ.', 'error');
+                registerBtn.disabled = false;
+                registerBtn.textContent = 'Đăng ký tài khoản';
+            }
+        });
+
+        googleLoginBtn.addEventListener('click', function () {
+            window.location.href = `${API_BASE_URL}/oauth2/authorization/google`;
+        });
+    </script>
+</body>
+</html>

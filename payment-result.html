@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kết quả thanh toán - MyShop</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',system-ui,sans-serif; }
+        body { background:#f4f6f9; display:flex; justify-content:center; align-items:center; min-height:100vh; }
+        .container { background:#fff; border-radius:20px; padding:40px; max-width:500px; width:100%; box-shadow:0 10px 40px rgba(0,0,0,0.1); text-align:center; }
+        .icon { font-size:64px; margin-bottom:16px; }
+        h2 { font-size:28px; margin-bottom:10px; }
+        .status-success { color:#27ae60; }
+        .status-failed { color:#e74c3c; }
+        .order-id { color:#555; margin:10px 0; }
+        .btn-home { display:inline-block; margin-top:20px; padding:12px 36px; background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; border:none; border-radius:40px; font-weight:600; font-size:16px; cursor:pointer; text-decoration:none; transition:transform 0.2s; }
+        .btn-home:hover { transform:scale(1.03); }
+        .btn-orders { background:linear-gradient(135deg,#27ae60,#2ecc71); margin-left:10px; }
+        .loading { display:inline-block; width:40px; height:40px; border:4px solid #f3f3f3; border-top:4px solid #667eea; border-radius:50%; animation:spin 1s linear infinite; margin:20px auto; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+        .error-msg { color:#e74c3c; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="resultContent">
+            <div class="loading"></div>
+            <p>Đang xác thực thanh toán...</p>
+        </div>
+    </div>
+    <script>
+        const API_BASE_URL = 'http://localhost:8080';
+
+        const container = document.getElementById('resultContent');
+
+        // Hàm lấy token (giống các file khác)
+        async function getAccessToken() {
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/account/refresh-token`, { method:'POST', credentials:'include' });
+                if (!res.ok) throw new Error('Refresh failed');
+                const data = await res.json();
+                const token = data?.result?.accessToken || data?.accessToken;
+                if (token) sessionStorage.setItem('accessToken', token);
+                return token;
+            } catch(e) { console.error(e); return null; }
+        }
+
+        async function fetchData(url, opts={}) {
+            let token = sessionStorage.getItem('accessToken');
+            if (!token) token = await getAccessToken();
+            if (!token) throw new Error('Không thể lấy access token. Vui lòng đăng nhập lại.');
+            const headers = { 'Content-Type':'application/json', 'Authorization':`Bearer ${token}`, ...(opts.headers||{}) };
+            let res = await fetch(url, { ...opts, credentials:'include', headers });
+            if (res.status===401 || res.status===403) {
+                const newToken = await getAccessToken();
+                if (newToken) {
+                    headers['Authorization'] = `Bearer ${newToken}`;
+                    res = await fetch(url, { ...opts, credentials:'include', headers });
+                    if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e?.message || e?.result?.message || `HTTP ${res.status}`); }
+                    const data = await res.json();
+                    return data?.result || data;
+                } else {
+                    sessionStorage.removeItem('accessToken');
+                    window.location.href = 'dang-nhap.html';
+                    throw new Error('Phiên đăng nhập hết hạn.');
+                }
+            }
+            if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e?.message || e?.result?.message || `HTTP ${res.status}`); }
+            const data = await res.json();
+            return data?.result || data;
+        }
+
+        // Lấy toàn bộ query params từ URL
+        const queryParams = new URLSearchParams(window.location.search);
+        const params = {};
+        for (const [key, value] of queryParams.entries()) {
+            params[key] = value;
+        }
+
+        // Hàm xử lý kết quả
+        async function handleResult() {
+            // Nếu không có orderId trong params, thử lấy từ responseCode
+            const responseCode = params['vnp_ResponseCode'];
+            const orderId = params['vnp_TxnRef'];
+            const amount = params['vnp_Amount'];
+            const transactionNo = params['vnp_TransactionNo'];
+
+            // Trường hợp không có đủ tham số → hiển thị lỗi
+            if (!responseCode || !orderId) {
+                container.innerHTML = `
+                    <div class="icon">❌</div>
+                    <h2 class="status-failed">Thanh toán thất bại!</h2>
+                    <p>Không tìm thấy thông tin giao dịch.</p>
+                    <div>
+                        <a href="order.html" class="btn-home btn-orders">📦 Xem đơn hàng</a>
+                        <a href="trangchu.html" class="btn-home">🏠 Về trang chủ</a>
+                    </div>
+                `;
+                return;
+            }
+
+            const isSuccess = responseCode === '00';
+
+            // Gửi dữ liệu lên backend để xác thực và lưu
+            try {
+                const payload = { params };
+                const response = await fetchData(`${API_BASE_URL}/api/payment/verify`, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+
+                // Hiển thị kết quả từ backend
+                const finalStatus = response?.status?.toUpperCase() === 'SUCCESS';
+                const finalOrderId = response?.orderId || orderId;
+
+                container.innerHTML = `
+                    <div class="icon">${finalStatus ? '✅' : '❌'}</div>
+                    <h2 class="${finalStatus ? 'status-success' : 'status-failed'}">${finalStatus ? 'Thanh toán thành công!' : 'Thanh toán thất bại!'}</h2>
+                    <p style="color:#555; margin:10px 0;">${finalStatus ? 'Cảm ơn bạn đã mua sắm!' : 'Giao dịch không thành công, vui lòng thử lại.'}</p>
+                    <p class="order-id">Mã đơn hàng: #${finalOrderId}</p>
+                    <div>
+                        <a href="order.html" class="btn-home btn-orders">📦 Xem đơn hàng</a>
+                        <a href="trangchu.html" class="btn-home">🏠 Về trang chủ</a>
+                    </div>
+                `;
+            } catch (e) {
+                // Nếu gọi API verify thất bại, hiển thị kết quả dựa trên responseCode
+                container.innerHTML = `
+                    <div class="icon">${isSuccess ? '✅' : '❌'}</div>
+                    <h2 class="${isSuccess ? 'status-success' : 'status-failed'}">${isSuccess ? 'Thanh toán thành công!' : 'Thanh toán thất bại!'}</h2>
+                    <p style="color:#555; margin:10px 0;">${isSuccess ? 'Cảm ơn bạn đã mua sắm!' : 'Giao dịch không thành công, vui lòng thử lại.'}</p>
+                    <p class="order-id">Mã đơn hàng: #${orderId}</p>
+                    <p style="color:#999; font-size:14px; margin-top:8px;">(Không thể xác thực với server, vui lòng kiểm tra sau)</p>
+                    <div>
+                        <a href="order.html" class="btn-home btn-orders">📦 Xem đơn hàng</a>
+                        <a href="trangchu.html" class="btn-home">🏠 Về trang chủ</a>
+                    </div>
+                `;
+                console.error('Lỗi verify:', e);
+            }
+        }
+
+        handleResult();
+    </script>
+</body>
+</html>
