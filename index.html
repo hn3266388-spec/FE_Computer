@@ -50,17 +50,23 @@
             top: 0;
             z-index: 1000;
         }
+        
+        /* ===== LOGO MỚI (ẢNH) ===== */
         .header .logo {
-            font-size: 24px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #4da3ff, #007bff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            height: 50px; /* Tăng kích thước logo */
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+            margin-right: 20px;
         }
-        .header .logo span {
-            -webkit-text-fill-color: #007bff;
+        .header .logo img {
+            height: 100%;
+            width: auto;
+            max-height: 50px;
+            object-fit: contain;
+            display: block;
         }
+
         .header .nav-menu {
             display: flex;
             gap: 15px;
@@ -574,6 +580,9 @@
             .header .header-actions {
                 margin-left: auto;
             }
+            .header .logo {
+                height: 40px;
+            }
             .hero-slider .slide {
                 flex-direction: column-reverse;
                 text-align: center;
@@ -611,7 +620,7 @@
                 font-size: 12px;
             }
             .header .logo {
-                font-size: 20px;
+                height: 35px;
             }
             .hero-slider .slide {
                 min-height: 350px;
@@ -632,7 +641,11 @@
 <body>
     <!-- ===== HEADER ===== -->
     <header class="header">
-        <div class="logo">My<span>Shop</span></div>
+        <!-- ===== LOGO ẢNH MỚI ===== -->
+        <div class="logo">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSq_Ki9HUIxbwtF7LY2XhV_QqLDUI2Pjx9ecJSBXrS1bA&s=10" alt="MyShop" />
+        </div>
+        
         <nav class="nav-menu">
             <a href="#">Trang chủ</a>
             <div class="dropdown" id="categoryDropdown">
@@ -730,7 +743,8 @@
         // ==============================
         // CONFIG
         // ==============================
-        const API_BASE_URL = 'http://localhost:8080';
+        // Đã đổi sang tên miền chính thức
+        const API_BASE_URL = 'https://hoang89computer-be.onrender.com';
         const DEFAULT_PAGE = 0;
         const PAGE_SIZE = 12;
 
